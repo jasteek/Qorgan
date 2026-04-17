@@ -96,37 +96,60 @@ export function Map() {
     return () => clearInterval(interval);
   }, [user]);
 
-  // 3. Init 2GIS map
+  // 3. Init 2GIS map — waits for container to be visible and sized
   useEffect(() => {
-    if (!userLocation || !mapContainerRef.current) return;
+    if (!userLocation) return;
 
-    if (scriptLoadedRef.current) {
-      if (!mapReady) initMap();
-      return;
-    }
+    let observer: ResizeObserver | null = null;
 
-    if ((window as any).DG) {
-      scriptLoadedRef.current = true;
-      initMap();
-      return;
-    }
+    const tryInit = () => {
+      const container = mapContainerRef.current;
+      if (!container) return false;
+      if (container.offsetWidth === 0 || container.offsetHeight === 0) return false;
 
-    const script = document.createElement("script");
-    // Added API Key here to the DG Loader
-    script.src = `https://maps.api.2gis.ru/2.0/loader.js?pkg=full&key=${API_KEY}`;
-    script.async = true;
-    script.id = "2gis-script";
+      if (scriptLoadedRef.current) {
+        if (!mapReady) initMap();
+        return true;
+      }
 
-    if (!document.getElementById("2gis-script")) {
-      document.head.appendChild(script);
-    }
+      if ((window as any).DG) {
+        scriptLoadedRef.current = true;
+        initMap();
+        return true;
+      }
 
-    script.onload = () => {
-      scriptLoadedRef.current = true;
-      setTimeout(initMap, 200);
+      // Load 2GIS script only once
+      if (!document.getElementById("2gis-script")) {
+        const script = document.createElement("script");
+        script.src = `https://maps.api.2gis.ru/2.0/loader.js?pkg=full&key=${API_KEY}`;
+        script.async = true;
+        script.id = "2gis-script";
+        script.onload = () => {
+          scriptLoadedRef.current = true;
+          setTimeout(initMap, 200);
+        };
+        document.head.appendChild(script);
+      }
+      return true;
     };
 
+    // Try immediately first
+    if (!tryInit()) {
+      // If container has zero size, observe it for resize (tab activation)
+      observer = new ResizeObserver(() => {
+        const container = mapContainerRef.current;
+        if (container && container.offsetWidth > 0 && container.offsetHeight > 0) {
+          tryInit();
+          observer?.disconnect();
+        }
+      });
+      if (mapContainerRef.current) {
+        observer.observe(mapContainerRef.current);
+      }
+    }
+
     return () => {
+      observer?.disconnect();
       if (mapRef.current && mapRef.current.remove) {
         try { mapRef.current.remove(); } catch {}
         mapRef.current = null;
