@@ -98,6 +98,13 @@ export function AIShield() {
     { id: 1, text: greeting[language] || greeting.ru, sender: "ai", time: new Date() }
   ]);
   const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([]);
+
+  // Reset chat when language changes so Gemini doesn't get confused by old history in a different language
+  useEffect(() => {
+    setMessages([{ id: Date.now(), text: greeting[language] || greeting.ru, sender: "ai", time: new Date() }]);
+    setChatHistory([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
