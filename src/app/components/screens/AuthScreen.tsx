@@ -215,9 +215,9 @@ export function AuthScreen() {
           </button>
 
           <p className="text-white/25 text-xs mt-4 text-center">
-            {language === "ru" ? "Для женщин Казахстана"
-              : language === "kk" ? "Қазақстан әйелдері үшін"
-              : "For women in Kazakhstan"}
+            {language === "ru" ? "Для женщин"
+              : language === "kk" ? "Әйелдер үшін"
+              : "For women"}
           </p>
         </div>
       )}
