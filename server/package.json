@@ -1,0 +1,15 @@
+{
+  "name": "qorgan-server",
+  "version": "1.0.0",
+  "description": "Backend for Qorgan app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
+  }
+}
